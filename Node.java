@@ -27,5 +27,17 @@ public class Node<T>
     this.data = data;
   }
 
+  // O(1)
+  public Node<T> getData()
+  {
+    return data;
+  }
+
+  // O(1)
+  public void setData(T data)
+  {
+    this.data = data;
+  }
+
   private T data;
 }
