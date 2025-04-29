@@ -23,8 +23,9 @@ public class Tree<T>
   {
     nodes = new ArrayList<>();
     parents = new ArrayList<>();
-    height = 0;
-    depth_cache = new HashMap<>();
+    cached_height = -1;
+    cached_depths = new HashMap<>();
+    cached_children = new HashMap<>();
   }
 
   // O(1)
@@ -36,13 +37,13 @@ public class Tree<T>
     Node<T> root = new Node<>(data);
     nodes.add(root);
     parents.add(null);
-    height = 0;
+    cached_height = 0;
 
     return root;
   }
 
   // O(1)
-  public Node<T> updateRoot(T data)
+  public Node<T> addRoot(T data)
   {
     if (nodes.isEmpty())
       return setRoot(data);
@@ -51,7 +52,7 @@ public class Tree<T>
     nodes.add(0, root);
     parents.add(0, null);
     parents.set(1, root);
-    height++;
+    cached_height++;
 
     clearCaches();
 
@@ -67,9 +68,12 @@ public class Tree<T>
     return nodes.get(0);
   }
 
-  // O(n)
+  // O(1) with memoization
   public List<Node<T>> getChildren(Node<T> node)
   {
+    if (cached_children.containsKey(node))
+      return cached_children.get(node);
+
     List<Node<T>> children = new ArrayList<>();
 
     ListIterator<Node<T>> nodesIter = nodes.listIterator();
@@ -84,6 +88,7 @@ public class Tree<T>
         children.add(currentNode);
     }
 
+    cached_children.put(node, children);
     return children;
   }
 
@@ -107,8 +112,8 @@ public class Tree<T>
   // O(1) with memoization
   public int getDepth(Node<T> node)
   {
-    if (depth_cache.containsKey(node))
-      return depth_cache.get(node);
+    if (cached_depths.containsKey(node))
+      return cached_depths.get(node);
 
     int depth = 0;
     Node<T> parent = getParent(node);
@@ -119,7 +124,7 @@ public class Tree<T>
       parent = getParent(parent);
     }
 
-    depth_cache.put(node, depth);
+    cached_depths.put(node, depth);
     return depth;
   }
 
@@ -135,20 +140,28 @@ public class Tree<T>
     return node;
   }
 
-  // O(1)
+  // O(1) with memoization
   public int getHeight()
   {
+    if (cached_height != -1)
+      return cached_height;
+
+    int height = 0;
+    for (Node<T> node : nodes)
+      height = Math.max(height, getDepth(node));
+
+    cached_height = height;
     return height;
   }
 
-  // O(n)
+  // O(1) with memoization
   public int getChildrenCount(Node<T> node)
   {
     List<Node<T>> children = getChildren(node);
     return children.size();
   }
 
-  // O(n^2)
+  // O(n) with memoization
   public int getLeavesCount(Node<T> node)
   {
     List<Node<T>> children = getChildren(node);
@@ -163,7 +176,7 @@ public class Tree<T>
     return leaves_count;
   }
 
-  // O(n^2)
+  // O(n) with memoization
   public List<Node<T>> traverseBreadthFirst()
   {
     List<Node<T>> nodes = new ArrayList<>();
@@ -184,7 +197,7 @@ public class Tree<T>
     return nodes;
   }
 
-  // O(n^2)
+  // O(n) with memoization
   public List<Node<T>> traverseDepthFirst()
   {
     List<Node<T>> nodes = new ArrayList<>();
@@ -206,12 +219,15 @@ public class Tree<T>
 
   private void clearCaches()
   {
-    depth_cache.clear();
+    cached_depths.clear();
+    cached_children.clear();
+    cached_height = -1;
   }
 
   private List<Node<T>> nodes;
   private List<Node<T>> parents;
-  private int height;
-  private Map<Node<T>, Integer> depth_cache;
-  //TODO children_cache
+
+  private int cached_height;
+  private Map<Node<T>, Integer> cached_depths;
+  private Map<Node<T>, List<Node<T>>> cached_children;
 }
