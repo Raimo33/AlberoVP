@@ -29,12 +29,13 @@ public class Tree<T>
   }
 
   // O(1)
-  public Node<T> setRoot(T data) throws IllegalStateException
+  public Node<T> setRoot(Node<T> root) throws IllegalStateException, IllegalArgumentException
   {
     if (nodes.isEmpty() == false)
       throw new IllegalStateException("Root already set");
+    if (root == null)
+      throw new IllegalArgumentException("Root cannot be null");
 
-    Node<T> root = new Node<>(data);
     nodes.add(root);
     parents.add(null);
     cached_height = 0;
@@ -43,12 +44,13 @@ public class Tree<T>
   }
 
   // O(1)
-  public Node<T> addRoot(T data)
+  public Node<T> updateRoot(Node<T> root) throws IllegalStateException, IllegalArgumentException
   {
     if (nodes.isEmpty())
-      return setRoot(data);
+      throw new IllegalStateException("Root not set");
+    if (root == null)
+      throw new IllegalArgumentException("Root cannot be null");
 
-    Node<T> root = new Node<>(data);
     nodes.add(0, root);
     parents.add(0, null);
     parents.set(1, root);
@@ -69,8 +71,13 @@ public class Tree<T>
   }
 
   // O(1) with memoization
-  public List<Node<T>> getChildren(Node<T> node)
+  public List<Node<T>> getChildren(Node<T> node) throws IllegalArgumentException
   {
+    if (node == null)
+      throw new IllegalArgumentException("Node cannot be null");
+    if (nodes.indexOf(node) == -1)
+      throw new IllegalArgumentException("Node not found in tree");
+
     if (cached_children.containsKey(node))
       return cached_children.get(node);
 
@@ -93,9 +100,14 @@ public class Tree<T>
   }
 
   // O(n)
-  public Node<T> getParent(Node<T> node)
+  public Node<T> getParent(Node<T> node) throws IllegalArgumentException
   {
+    if (node == null)
+      throw new IllegalArgumentException("Node cannot be null");
+
     final int index = nodes.indexOf(node);
+    if (index == -1)
+      throw new IllegalArgumentException("Node not found in tree");
 
     if (index == -1)
       return null;
@@ -110,8 +122,11 @@ public class Tree<T>
   }
 
   // O(1) with memoization
-  public int getDepth(Node<T> node)
+  public int getDepth(Node<T> node) throws IllegalArgumentException
   {
+    if (node == null)
+      throw new IllegalArgumentException("Node cannot be null");
+
     if (cached_depths.containsKey(node))
       return cached_depths.get(node);
 
@@ -129,9 +144,11 @@ public class Tree<T>
   }
 
   // O(1)
-  public Node<T> insertNode(Node<T> parent, T data)
+  public Node<T> insertNode(Node<T> parent, Node<T> node) throws IllegalArgumentException
   {
-    Node<T> node = new Node<>(data);
+    if (node == null)
+      throw new IllegalArgumentException("Node cannot be null");
+
     nodes.add(node);
     parents.add(parent);
 
@@ -157,13 +174,19 @@ public class Tree<T>
   // O(1) with memoization
   public int getChildrenCount(Node<T> node)
   {
+    if (node == null)
+      throw new IllegalArgumentException("Node cannot be null");
+
     List<Node<T>> children = getChildren(node);
     return children.size();
   }
 
   // O(n) with memoization
-  public int getLeavesCount(Node<T> node)
+  public int getLeavesCount(Node<T> node) throws IllegalArgumentException
   {
+    if (node == null)
+      throw new IllegalArgumentException("Node cannot be null");
+
     List<Node<T>> children = getChildren(node);
 
     if (children.isEmpty())
